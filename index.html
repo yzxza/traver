@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TripWise AI 旅行规划器</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="旅行规划导航">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8-8-2z"></path></svg>
+        </div>
+        <div>
+          <strong>TripWise AI</strong>
+          <span>科学旅行安排</span>
+        </div>
+      </div>
+
+      <nav class="nav-list">
+        <button class="nav-item active" type="button" data-scroll-target="planner">
+          <svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h10"></path></svg>
+          <span>规划输入</span>
+        </button>
+        <button class="nav-item" type="button" data-scroll-target="result">
+          <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"></path></svg>
+          <span>行程结果</span>
+        </button>
+        <button class="nav-item" type="button" data-scroll-target="skills">
+          <svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>
+          <span>Skill 状态</span>
+        </button>
+      </nav>
+
+      <div class="side-block">
+        <div class="side-label">内置能力</div>
+        <div class="capability"><b>需求解析</b><span>自然语言转结构化条件</span></div>
+        <div class="capability"><b>航班窗口</b><span>模拟查价 Skill，预留真实接口</span></div>
+        <div class="capability"><b>预约清单</b><span>输出提前预约时间和官网链接</span></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="hero" id="planner">
+        <div class="hero-copy">
+          <p class="eyebrow">AI Travel Operating Desk</p>
+          <h1>把一句旅行想法，变成可执行行程。</h1>
+          <p>输入出发地、目的地、日期范围和偏好，系统会生成推荐出返程日期、城市顺序、住宿区域、预约清单和每日安排。</p>
+        </div>
+        <div class="hero-visual" aria-label="旅行路线示意图">
+          <div class="route-card">
+            <div class="route-node start">出发</div>
+            <div class="route-line"></div>
+            <div class="route-node">航班</div>
+            <div class="route-line"></div>
+            <div class="route-node">住宿</div>
+            <div class="route-line"></div>
+            <div class="route-node end">行程</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="planner-grid">
+        <form class="planner-panel" id="plannerForm">
+          <div class="panel-heading">
+            <div>
+              <h2>告诉 AI 你的大致规划</h2>
+              <p>可以说得很粗略，右侧字段会自动补齐和调整。</p>
+            </div>
+            <button class="icon-button" type="button" id="sampleBtn" title="填入示例">
+              <svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+            </button>
+          </div>
+
+          <label class="field full">
+            <span>自然语言需求</span>
+            <textarea id="promptInput" rows="7">8 月从上海出发去日本 7 天，2 个成人，预算 1.2 万左右。想去东京、京都和大阪，节奏不要太累，酒店尽量少换，想知道哪天飞便宜、住哪里方便安全、哪些景点要提前预约。</textarea>
+          </label>
+
+          <div class="field-row">
+            <label class="field">
+              <span>出发城市</span>
+              <input id="originInput" value="上海" />
+            </label>
+            <label class="field">
+              <span>目的地</span>
+              <input id="destinationInput" value="日本 东京 京都 大阪" />
+            </label>
+          </div>
+
+          <div class="field-row">
+            <label class="field">
+              <span>日期范围</span>
+              <input id="dateWindowInput" value="2026-08-01 至 2026-08-20" />
+            </label>
+            <label class="field">
+              <span>旅行天数</span>
+              <input id="daysInput" type="number" min="2" max="30" value="7" />
+            </label>
+          </div>
+
+          <div class="field-row">
+            <label class="field">
+              <span>预算</span>
+              <input id="budgetInput" type="number" min="1000" step="500" value="12000" />
+            </label>
+            <label class="field">
+              <span>人数</span>
+              <input id="travelersInput" value="2 成人" />
+            </label>
+          </div>
+
+          <div class="controls">
+            <label class="field compact">
+              <span>节奏</span>
+              <select id="paceInput">
+                <option value="balanced">均衡</option>
+                <option value="relaxed">轻松</option>
+                <option value="intense">紧凑</option>
+              </select>
+            </label>
+            <label class="field compact">
+              <span>优先级</span>
+              <select id="priorityInput">
+                <option value="value">性价比</option>
+                <option value="cheap">省钱</option>
+                <option value="comfort">舒适</option>
+                <option value="family">亲子友好</option>
+              </select>
+            </label>
+            <label class="switch">
+              <input id="avoidRedEyeInput" type="checkbox" checked />
+              <span>避开红眼航班</span>
+            </label>
+            <label class="switch">
+              <input id="minHotelInput" type="checkbox" checked />
+              <span>尽量少换酒店</span>
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button class="primary-button" type="submit">
+              <svg viewBox="0 0 24 24"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
+              生成旅行规划
+            </button>
+            <button class="ghost-button" type="button" id="exportBtn">
+              <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="M7 10l5 5 5-5"></path><path d="M12 15V3"></path></svg>
+              导出 JSON
+            </button>
+          </div>
+        </form>
+
+        <aside class="assistant-panel" aria-live="polite">
+          <div class="panel-heading">
+            <div>
+              <h2>AI 编排过程</h2>
+              <p>当前版本使用模拟 Skill，真实接口可后续替换。</p>
+            </div>
+            <span class="status-dot">Ready</span>
+          </div>
+          <div class="run-log" id="runLog"></div>
+        </aside>
+      </section>
+
+      <section class="result-section" id="result">
+        <div class="result-header">
+          <div>
+            <p class="eyebrow">Structured Result</p>
+            <h2>结构化旅行方案</h2>
+          </div>
+          <div class="variant-tabs" role="tablist" aria-label="方案版本">
+            <button class="variant-tab active" type="button" data-variant="value">性价比</button>
+            <button class="variant-tab" type="button" data-variant="cheap">省钱</button>
+            <button class="variant-tab" type="button" data-variant="comfort">舒适</button>
+            <button class="variant-tab" type="button" data-variant="family">亲子</button>
+          </div>
+        </div>
+
+        <div class="summary-grid" id="summaryGrid"></div>
+
+        <div class="content-grid">
+          <div class="itinerary-card">
+            <div class="panel-heading">
+              <div>
+                <h3>每日行程</h3>
+                <p>按抵达强度、城市移动和预约窗口自动排序。</p>
+              </div>
+            </div>
+            <div id="itineraryList"></div>
+          </div>
+
+          <div class="insight-stack">
+            <section class="mini-panel">
+              <h3>航班价格建议</h3>
+              <div id="flightOptions"></div>
+            </section>
+            <section class="mini-panel">
+              <h3>住宿区域</h3>
+              <div id="hotelAreas"></div>
+            </section>
+            <section class="mini-panel">
+              <h3>预约事项</h3>
+              <div id="bookingTasks"></div>
+            </section>
+            <section class="mini-panel">
+              <h3>城市间交通</h3>
+              <div id="transportOptions"></div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <section class="skills-section" id="skills">
+        <div>
+          <p class="eyebrow">Integration Plan</p>
+          <h2>真实服务接入位置</h2>
+        </div>
+        <div class="skill-grid">
+          <article class="skill-card">
+            <b>LLM Planner API</b>
+            <span>把用户自然语言解析成 JSON，并生成解释文字。</span>
+            <code>/api/plan</code>
+          </article>
+          <article class="skill-card">
+            <b>Flight Price Skill</b>
+            <span>查询日期窗口、往返价格、红眼和中转风险。</span>
+            <code>/api/flights/search</code>
+          </article>
+          <article class="skill-card">
+            <b>Booking Rule Skill</b>
+            <span>查询景点官网、提前预约时间、售罄风险。</span>
+            <code>/api/booking-rules</code>
+          </article>
+          <article class="skill-card">
+            <b>Transport Skill</b>
+            <span>对比高铁、飞机、巴士的门到门耗时和价格。</span>
+            <code>/api/intercity</code>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
